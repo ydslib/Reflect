@@ -45,6 +45,9 @@ public class MethodReflect extends MemberReflect<Method> {
     }
 
     private Reflect invokeBy(Reflect reflect, Object receiver, Object... arguments) throws ReflectException {
+        if (receiver == null || arguments == null || reflect == null) {
+            throw new NullPointerException("the reflect of class object or parameters should not null");
+        }
         try {
             Object retMethod = accessible(super.off()).invoke(receiver, arguments);
             if (retMethod == null) {

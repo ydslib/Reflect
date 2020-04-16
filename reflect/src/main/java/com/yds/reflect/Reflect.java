@@ -1,5 +1,7 @@
 package com.yds.reflect;
 
+import android.text.TextUtils;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -64,13 +66,20 @@ public abstract class Reflect {
         return from(forName(name));
     }
 
-    public static MethodReflect from(Method method, Object object) {
+    public static MethodReflect from(Method method, Object receiver) {
         if (method == null) {
             throw new ReflectException("method is null");
         }
-        return new MethodReflect(nullReflect(), method, object);
+        return new MethodReflect(nullReflect(), method, receiver);
     }
 
+    /**
+     * 反射静态方法
+     *
+     * @param method
+     * @param arguments
+     * @return
+     */
     public static MethodReflect from(Method method, Object... arguments) {
         if (method == null) {
             throw new ReflectException("method is null");
@@ -78,11 +87,25 @@ public abstract class Reflect {
         return new MethodReflect(nullReflect(), method, null, arguments);
     }
 
-    public static MethodReflect from(Method method, Object object, Object... arguments) {
+    public static MethodReflect from(String methodName, Object receiver, Object... arguments) {
+        if (TextUtils.isEmpty(methodName)) {
+            throw new ReflectException("methodName is null");
+        }
+        Class<?>[] paramTypes = types(arguments);
+        Method method = null;
+        try {
+            method = accessible(receiver.getClass().getDeclaredMethod(methodName, paramTypes));
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return from(method, receiver, arguments);
+    }
+
+    public static MethodReflect from(Method method, Object receiver, Object... arguments) {
         if (method == null) {
             throw new ReflectException("method is null");
         }
-        return new MethodReflect(nullReflect(), method, object, arguments);
+        return new MethodReflect(nullReflect(), method, receiver, arguments);
     }
 
     public static MethodReflect from(Method method) {
@@ -203,15 +226,15 @@ public abstract class Reflect {
     }
 
     public MethodReflect method(String methodName) throws ReflectException {
-        return method(methodName,EMPTY_CLASS_ARRAY);
+        return method(methodName, EMPTY_CLASS_ARRAY);
     }
 
     public MethodReflect method(String methodName, Class<?>... paramTypes) {
-        Method method = method0(methodName,paramTypes);
-        if (method==null){
+        Method method = method0(methodName, paramTypes);
+        if (method == null) {
             return null;
         }
-        return new MethodReflect(this,method,off());
+        return new MethodReflect(this, method, off());
     }
 
     private Method method0(String methodName, Class<?>... paramTypes) throws ReflectException {
@@ -224,7 +247,7 @@ public abstract class Reflect {
             } catch (NoSuchMethodException e) {
                 while (clazz != null) {
                     try {
-                        method = accessible(clazz.getDeclaredMethod(methodName,paramTypes));
+                        method = accessible(clazz.getDeclaredMethod(methodName, paramTypes));
                     } catch (NoSuchMethodException ignore) {
 
                     }
@@ -354,7 +377,6 @@ public abstract class Reflect {
 
     /**
      * 打破final修饰，使字段可写
-     *
      */
     public static Field breakFinal(Field field) throws IllegalAccessException, NoSuchFieldException {
         field.setAccessible(true);
