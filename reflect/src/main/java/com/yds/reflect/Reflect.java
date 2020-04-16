@@ -64,6 +64,31 @@ public abstract class Reflect {
         return from(forName(name));
     }
 
+    public static MethodReflect from(Method method, Object object) {
+        if (method == null) {
+            throw new ReflectException("method is null");
+        }
+        return new MethodReflect(nullReflect(), method, object);
+    }
+
+    public static MethodReflect from(Method method, Object... arguments) {
+        if (method == null) {
+            throw new ReflectException("method is null");
+        }
+        return new MethodReflect(nullReflect(), method, null, arguments);
+    }
+
+    public static MethodReflect from(Method method, Object object, Object... arguments) {
+        if (method == null) {
+            throw new ReflectException("method is null");
+        }
+        return new MethodReflect(nullReflect(), method, object, arguments);
+    }
+
+    public static MethodReflect from(Method method) {
+        return from(method, EMPTY_OBJECT_ARRAY);
+    }
+
     private static <T> Class<T> forName(String name) throws ReflectException {
         return forName(name, null);
     }
