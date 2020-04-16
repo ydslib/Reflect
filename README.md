@@ -18,7 +18,7 @@ allprojects {
 **Step 2**. Add the dependency
 ```gradle
 dependencies {
-    implementation 'com.github.ydslib:Reflect:1.0.1'
+    implementation 'com.github.ydslib:Reflect:1.0.2'
 }
 ```
 Share this release
